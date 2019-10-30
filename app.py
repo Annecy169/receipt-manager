@@ -4,8 +4,11 @@ import json
 import sys
 from datetime import datetime
 
-session = boto3.Session(profile_name='xander')
+session = boto3.Session(profile_name='default')
 s3 = boto3.client('s3')
+
+month_start = 21
+month_end = 20
 
 def month_string_to_number(string):
     s = string.strip()[:3]
@@ -56,7 +59,7 @@ except:
     year = "none"
 
 response = s3.list_objects(
-    Bucket="receipts.xander.pro"
+    Bucket="my_receipt_bucket"
 )
 
 if (month != "none") and (year != "none"):
@@ -85,20 +88,20 @@ def set_csv(csv_data, object_value):
 
 if (month != "none") and (year != "none"):
     for object in response["Contents"]:
-        folder = '21%s%s-20%s%s' % (month, year, month + 1, year)
+        folder = '%s%s%s-%s%s%s' % (month_start, month, year, month_end, month + 1, year)
         if ((object["Key"].split("/")[0] == folder) and (object["Key"].split("/")[1])):
             csv = set_csv(csv, object)
 elif (month == "none") and (year != "none"):
     for object in response["Contents"]:
         for x in range(0, 12):
             m = x + 1
-            folder = '21%s%s-20%s%s' % (m, year, m + 1, year)
+            folder = '%s%s%s-%s%s%s' % (month_start, m, year, month_end, m + 1, year)
             if ((object["Key"].split("/")[0] == folder) and (object["Key"].split("/")[1])):
                 csv = set_csv(csv, object)
 elif (month != "none") and (year == "none"):
     for object in response["Contents"]:
         current_year = datetime.today().year
-        folder = '21%s%s-20%s%s' % (month, current_year, month + 1, current_year)
+        folder = '%s%s%s-%s%s%s' % (month_start, month, current_year, month_end, month + 1, current_year)
         if ((object["Key"].split("/")[0] == folder) and (object["Key"].split("/")[1])):
             csv = set_csv(csv, object)
 else:
