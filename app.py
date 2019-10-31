@@ -5,7 +5,7 @@ import sys
 from datetime import datetime
 
 session = boto3.Session(profile_name='default')
-s3 = boto3.client('s3')
+s3 = session.client('s3')
 
 month_start = 21
 month_end = 20
@@ -59,7 +59,7 @@ except:
     year = "none"
 
 response = s3.list_objects(
-    Bucket="my_receipt_bucket"
+    Bucket="my-s3-bucket"
 )
 
 if (month != "none") and (year != "none"):
