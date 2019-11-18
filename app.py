@@ -72,6 +72,7 @@ elif (month != "none") and (year == "none"):
 else:
     spending_report = open("spending_report.csv","w") 
 
+total_cost = 0
 csv = '''Date,Price,Description
 '''
 
@@ -84,30 +85,36 @@ def set_csv(csv_data, object_value):
     item = '''%s,%s,%s
 ''' % (date, price, description)
     csv_data = csv_data + item
-    return csv_data
+    return csv_data, price
 
 if (month != "none") and (year != "none"):
     for object in response["Contents"]:
         folder = '%s%s%s-%s%s%s' % (month_start, month, year, month_end, month + 1, year)
         if ((object["Key"].split("/")[0] == folder) and (object["Key"].split("/")[1])):
-            csv = set_csv(csv, object)
+            csv, cost = set_csv(csv, object)
+            total_cost = total_cost + float(cost)
 elif (month == "none") and (year != "none"):
     for object in response["Contents"]:
         for x in range(0, 12):
             m = x + 1
             folder = '%s%s%s-%s%s%s' % (month_start, m, year, month_end, m + 1, year)
             if ((object["Key"].split("/")[0] == folder) and (object["Key"].split("/")[1])):
-                csv = set_csv(csv, object)
+                csv, cost = set_csv(csv, object)
+                total_cost = total_cost + float(cost)
 elif (month != "none") and (year == "none"):
     for object in response["Contents"]:
         current_year = datetime.today().year
         folder = '%s%s%s-%s%s%s' % (month_start, month, current_year, month_end, month + 1, current_year)
         if ((object["Key"].split("/")[0] == folder) and (object["Key"].split("/")[1])):
-            csv = set_csv(csv, object)
+            csv, cost = set_csv(csv, object)
+            total_cost = total_cost + float(cost)
 else:
     for object in response["Contents"]:
         if object["Key"].split("/")[1]:
-            csv = set_csv(csv, object)
+            csv, cost = set_csv(csv, object)
+            total_cost = total_cost + float(cost)
 
+csv =  csv + '''%s,%s,%s
+''' % ("Total", total_cost, "")
 spending_report.writelines(csv) 
 spending_report.close()
